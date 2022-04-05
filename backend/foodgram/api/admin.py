@@ -1,10 +1,12 @@
 from django.contrib import admin
 
-from .models import Favorite, Follow, Ingredient, Recipe, ShoppingCart, Tag
+from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
+                     ShoppingCart, Tag)
 
 
 class IngredientsAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
+    list_filter = ('name',)
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -12,7 +14,10 @@ class TagAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('author', 'name', 'image', 'text', 'cooking_time')
+    fields = (('author', 'name'), 'image', 'text', ('ingredients', 'tags'),
+              'cooking_time')
+    list_display = ('author', 'name', 'favorites_count')
+    list_filter = ('author', 'name', 'tags')
 
 
 class FollowAdmin(admin.ModelAdmin):
@@ -20,14 +25,20 @@ class FollowAdmin(admin.ModelAdmin):
 
 
 class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipes')
+    list_display = ('user', 'recipe')
 
 
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'recipe')
 
 
+class IngredientAmountAdmin(admin.ModelAdmin):
+    list_display = ('recipe', 'ingredient', 'amount')
+    list_filter = ('ingredient',)
+
+
 admin.site.register(Ingredient, IngredientsAdmin)
+admin.site.register(IngredientAmount, IngredientAmountAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Follow, FollowAdmin)
