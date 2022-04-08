@@ -114,6 +114,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             except Exception:
                 return Response('Нет в корзине',
                                 status=status.HTTP_400_BAD_REQUEST)
+        return Response('Что-то пошло не так',
+                        status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True,
             methods=('post', 'delete'),
@@ -137,6 +139,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             except Exception:
                 return Response('Рецепт не добавлен в избранное',
                                 status=status.HTTP_400_BAD_REQUEST)
+        return Response('Что-то пошло не так',
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class DownloadShoppingCart(APIView):
