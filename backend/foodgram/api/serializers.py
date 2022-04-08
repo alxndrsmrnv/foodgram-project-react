@@ -1,5 +1,6 @@
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
+from drf_extra_fields.fields import Base64ImageField
 
 from .models import Follow, Ingredient, IngredientAmount, Recipe, Tag, User
 
@@ -69,6 +70,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -131,4 +133,4 @@ class FollowUnfollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Follow
-        fields = ('user', 'author',)
+        fields = ('user', 'author')

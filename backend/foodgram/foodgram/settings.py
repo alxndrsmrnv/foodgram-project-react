@@ -2,7 +2,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = '=h$8=g55fbyfix(rc**vy^yvkpv+r@ykv$#m!hib1+_s+xy(hd' ##Его в .env помещу потом
+SECRET_KEY = os.getenv('SECRET_KEY', default='')
 
 DEBUG = True
 
