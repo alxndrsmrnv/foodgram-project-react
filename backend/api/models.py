@@ -33,6 +33,7 @@ class Tag(models.Model):
         verbose_name='Название')
     color = models.CharField(
         max_length=7,
+        unique=True,
         verbose_name='Цвет')
     slug = models.SlugField(
         unique=True,
