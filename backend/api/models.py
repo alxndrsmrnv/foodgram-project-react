@@ -6,9 +6,9 @@ User = get_user_model()
 
 
 tags = [
-    ('breakfast', 'Завтрак'),
-    ('lunch', 'Обед'),
-    ('dinner', 'Ужин'),
+    ('Завтрак', 'Завтрак'),
+    ('Обед', 'Обед'),
+    ('Ужин', 'Ужин'),
 ]
 
 
@@ -96,6 +96,7 @@ class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
+        related_name='recipe_ingredient',
         verbose_name='Ингредиенты')
     amount = models.PositiveIntegerField(
         default=1,

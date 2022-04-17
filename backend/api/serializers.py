@@ -65,9 +65,8 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = serializers.PrimaryKeyRelatedField(many=True,
-                                              queryset=Tag.objects.all())
     author = ProfileSerializer(read_only=True)
+    tags = TagSerializer(many=True)
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()

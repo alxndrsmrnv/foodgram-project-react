@@ -7,6 +7,7 @@ from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
 class IngredientsAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
     list_filter = ('name',)
+    search_fields = ('name',)
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -18,6 +19,7 @@ class RecipeAdmin(admin.ModelAdmin):
               'cooking_time')
     list_display = ('author', 'name', 'favorites_count')
     list_filter = ('author', 'name', 'tags')
+    search_fields = ('author', 'name__name',)
 
 
 class FollowAdmin(admin.ModelAdmin):

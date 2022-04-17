@@ -3,6 +3,7 @@ import io
 from django.db import IntegrityError
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
@@ -14,6 +15,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .filters import RecipeFilter, IngredientFilter
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag, User)
 from .serializers import (FollowUnfollowSerializer, IngredientSerializer,
@@ -77,21 +79,27 @@ class FollowUnfollowViewSet(APIView):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    http_method_names = ('get', 'post', 'patch', 'delete')
+    http_method_names = ('get', 'post', 'put', 'delete')
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET' or 'PATCH':
+        if self.request.method == 'GET':
             return RecipeSerializer
         return RecipeCreateSerializer
+
+
 
     @action(detail=True,
             methods=('post', 'delete'),
