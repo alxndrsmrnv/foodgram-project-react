@@ -144,6 +144,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name')
         instance.text = validated_data.get('text')
         instance.cooking_time = validated_data.get('cooking_time')
+        IngredientAmount.objects.delete(recipe=instance)
         tags = validated_data.get('tags')
         ingredients = validated_data.get('ingredients')
         self.set_tags_ingredients(instance, tags, ingredients)

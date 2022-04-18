@@ -39,12 +39,6 @@ class Tag(models.Model):
         unique=True,
         default='')
 
-    def colored_name(self):
-        return format_html('<span style="color: #{};">{}</span>',
-                           self.title,
-                           self.hex,
-                           self.slug)
-
     def __str__(self) -> str:
         return self.name
 
