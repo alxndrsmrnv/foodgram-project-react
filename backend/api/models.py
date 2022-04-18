@@ -96,7 +96,7 @@ class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='recipe_ingredient',
+        related_name='ingredients',
         verbose_name='Ингредиенты')
     amount = models.PositiveIntegerField(
         default=1,

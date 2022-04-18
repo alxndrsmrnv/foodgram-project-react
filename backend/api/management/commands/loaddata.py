@@ -5,8 +5,7 @@ from api.models import Ingredient
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        with open('ingredients.csv',
-                  mode='r', encoding='utf8') as file:
+        with open('ingredients.csv', 'r', encoding='utf8') as file:
             reader = csv.reader(file)
             print(reader)
             for line in reader:

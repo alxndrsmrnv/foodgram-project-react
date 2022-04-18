@@ -14,10 +14,12 @@ from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import permissions
 
 from .filters import RecipeFilter, IngredientFilter
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag, User)
+from .permissions import IsOwnerOrAdminOrReadOnly
 from .serializers import (FollowUnfollowSerializer, IngredientSerializer,
                           ProfileSerializer, RecipeCreateSerializer,
                           RecipeInfoSerializer, RecipeSerializer,
@@ -42,6 +44,7 @@ class ProfileViewSet(UserViewSet):
 class SubscribersViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = SubscribersSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
@@ -51,6 +54,7 @@ class SubscribersViewSet(viewsets.ReadOnlyModelViewSet):
 class FollowUnfollowViewSet(APIView):
     queryset = Follow.objects.all()
     serializer_class = FollowUnfollowSerializer
+    permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request, author_id):
         author = get_object_or_404(User, id=author_id)
@@ -93,17 +97,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'put', 'delete')
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
+    serializer_class = RecipeCreateSerializer
+    permission_classes = (IsOwnerOrAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return RecipeSerializer
         return RecipeCreateSerializer
 
-
-
     @action(detail=True,
             methods=('post', 'delete'),
-            serializer_class=RecipeInfoSerializer,)
+            serializer_class=RecipeInfoSerializer,
+            permission_classes=(permissions.IsAuthenticated,))
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
@@ -127,7 +132,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True,
             methods=('post', 'delete'),
-            serializer_class=RecipeInfoSerializer,)
+            serializer_class=RecipeInfoSerializer,
+            permission_classes=(permissions.IsAuthenticated,))
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':

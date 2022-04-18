@@ -19,7 +19,7 @@ class RecipeAdmin(admin.ModelAdmin):
               'cooking_time')
     list_display = ('author', 'name', 'favorites_count')
     list_filter = ('author', 'name', 'tags')
-    search_fields = ('author', 'name__name',)
+    search_fields = ('author', 'name',)
 
 
 class FollowAdmin(admin.ModelAdmin):
