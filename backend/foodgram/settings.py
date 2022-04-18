@@ -2,11 +2,11 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'asdasd'
+SECRET_KEY = os.getenv('SECRET_KEY', default='')
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('HOST', default='0:8000')
 
 AUTH_USER_MODEL = 'users.User'
 
