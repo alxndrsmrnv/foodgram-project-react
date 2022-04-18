@@ -30,6 +30,7 @@ class ProfileViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = ProfileSerializer
     filter_backends = (filters.SearchFilter,)
+    permission_classes = (permissions.AllowAny,)
 
     @action(detail=False,
             methods=('get',))

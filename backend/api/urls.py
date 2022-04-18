@@ -8,7 +8,6 @@ from .views import (DownloadShoppingCart, FollowUnfollowViewSet,
 router = DefaultRouter()
 router.register(r'users/subscriptions', SubscribersViewSet,
                 basename='subscriptions')
-
 router.register(r'users', ProfileViewSet, basename='users')
 router.register(r'tags', TagViewSet, basename='tags')
 router.register(r'ingredients', IngredientViewSet, basename='ingredients')

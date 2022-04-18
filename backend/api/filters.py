@@ -1,4 +1,4 @@
-import django_filters as filters
+from django_filters.rest_framework import filters
 
 from .models import Ingredient, Tag, Recipe
 
@@ -29,10 +29,10 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
         if value:
             return queryset.filter(is_favorited__user=user)
-        return Recipe.objects.all()
+        return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
         user = self.request.user
         if value:
             return queryset.filter(in_shopping_cart__user=user)
-        return Recipe.objects.all()
+        return queryset
