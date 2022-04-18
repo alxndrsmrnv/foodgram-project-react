@@ -90,11 +90,12 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    http_method_names = ('get', 'post', 'put', 'delete')
+    http_method_names = ('get', 'post', 'patch', 'delete')
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
     serializer_class = RecipeCreateSerializer
@@ -169,7 +170,7 @@ class DownloadShoppingCart(APIView):
         textob.setTextOrigin(inch, inch)
         pdfmetrics.registerFont(TTFont(
             'FreeSans',
-            'c:/Dev/foodgram-project-react/data/FreeSans.ttf'))
+            'FreeSans.ttf'))
         textob.setFont('FreeSans', 32)
         shopping_cart = ShoppingCart.objects.filter(user=request.user)
         shopping_list_name = []

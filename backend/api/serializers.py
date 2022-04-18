@@ -1,10 +1,7 @@
-from attr import attr
 from django.forms import ValidationError
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from idna import intranges_contain
-from requests import Response
-from rest_framework import serializers, status
+from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 
 from .models import Follow, Ingredient, IngredientAmount, Recipe, Tag, User
@@ -50,6 +47,7 @@ class IngredientAmountSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
+
 
 class IngredientInRecipeRepresentation(serializers.ModelSerializer):
 
