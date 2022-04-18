@@ -1,1 +1,1 @@
-# praktikum_new_diplom
+51.250.76.255
