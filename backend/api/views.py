@@ -1,6 +1,9 @@
 import io
 
 from django.db import IntegrityError
+from django.db.models import Sum
+from django.core.exceptions import ObjectDoesNotExist
+from django.forms import ValidationError
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,13 +13,12 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import permissions
 
-from .filters import RecipeFilter, IngredientFilter
+from .filters import IngredientFilter, RecipeFilter
 from .models import (Favorite, Follow, Ingredient, IngredientAmount, Recipe,
                      ShoppingCart, Tag, User)
 from .permissions import IsOwnerOrAdminOrReadOnly
@@ -38,7 +40,7 @@ class ProfileViewSet(UserViewSet):
         serializer = ProfileSerializer(request.user,
                                        data=request.data,
                                        partial=True)
-        serializer.is_valid()
+        serializer.is_valid(raise_exeption=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -73,10 +75,10 @@ class FollowUnfollowViewSet(APIView):
     def delete(self, request, author_id):
         author = get_object_or_404(User, id=author_id)
         try:
-            object = Follow.objects.get(author=author)
+            object = Follow.objects.get(user=request.user, author=author)
             object.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception:
+        except ObjectDoesNotExist:
             return Response('Вы не подписаны на этого пользователя',
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -107,27 +109,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeSerializer
         return RecipeCreateSerializer
 
-    @action(detail=True,
-            methods=('post', 'delete'),
-            serializer_class=RecipeInfoSerializer,
-            permission_classes=(permissions.IsAuthenticated,))
-    def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
+    def perform_create(self, serializer):
+        return super().perform_create(serializer)
+
+    def favorite_and_shopping_cart(self, request, model, recipe):
         if request.method == 'POST':
             try:
-                ShoppingCart.objects.create(user=request.user, recipe=recipe)
+                model.objects.create(user=request.user, recipe=recipe)
                 serializer = RecipeInfoSerializer(recipe)
-                return Response(serializer.data, status.HTTP_201_CREATED)
+                return Response(serializer.data,
+                                status.HTTP_201_CREATED)
             except IntegrityError:
-                return Response('Уже в корзине',
+                return Response('Уже добавлено',
                                 status=status.HTTP_400_BAD_REQUEST)
         if request.method == 'DELETE':
             try:
-                object = ShoppingCart.objects.get(recipe=recipe)
+                object = model.objects.get(user=request.user,
+                                           recipe=recipe)
                 object.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            except Exception:
-                return Response('Нет в корзине',
+            except ObjectDoesNotExist:
+                return Response('Не добавлено',
                                 status=status.HTTP_400_BAD_REQUEST)
         return Response('Что-то пошло не так',
                         status=status.HTTP_400_BAD_REQUEST)
@@ -136,27 +138,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
             methods=('post', 'delete'),
             serializer_class=RecipeInfoSerializer,
             permission_classes=(permissions.IsAuthenticated,))
+    def shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipe, id=pk)
+        self.favorite_and_shopping_cart(request, ShoppingCart, recipe)
+
+    @action(detail=True,
+            methods=('post', 'delete'),
+            serializer_class=RecipeInfoSerializer,
+            permission_classes=(permissions.IsAuthenticated,))
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
-        if request.method == 'POST':
-            try:
-                Favorite.objects.create(user=request.user, recipe=recipe)
-                serializer = RecipeInfoSerializer(recipe)
-                return Response(serializer.data,
-                                status.HTTP_201_CREATED)
-            except IntegrityError:
-                return Response('Уже в избранном',
-                                status=status.HTTP_400_BAD_REQUEST)
-        if request.method == 'DELETE':
-            try:
-                object = Favorite.objects.get(recipe=recipe)
-                object.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except Exception:
-                return Response('Рецепт не добавлен в избранное',
-                                status=status.HTTP_400_BAD_REQUEST)
-        return Response('Что-то пошло не так',
-                        status=status.HTTP_400_BAD_REQUEST)
+        self.favorite_and_shopping_cart(request, Favorite, recipe)
 
 
 class DownloadShoppingCart(APIView):
@@ -173,28 +165,35 @@ class DownloadShoppingCart(APIView):
             'FreeSans',
             'FreeSans.ttf'))
         textob.setFont('FreeSans', 32)
-        shopping_cart = ShoppingCart.objects.filter(user=request.user)
+        shopping_cart = ShoppingCart.objects.filter(user=request.user).values()
         shopping_list_name = []
         shopping_list_amount = []
+        ingredients = Recipe.objects.filter(
+            in_shopping_cart__user=request.user).values(
+                'ingredients__name',
+                'ingredients__measurement_unit',
+                'ingredientamount__amount'
+                ).order_by(
+            'ingredients__name').annotate(
+                total_amount=Sum(
+                    'ingredientamount__amount'))
         for recipe in shopping_cart:
-            ingredients = IngredientAmount.objects.filter(
-                recipe=recipe.recipe)
-            for ingredient in ingredients:
-                if ingredient.ingredient.name not in shopping_list_name:
-                    shopping_list_name.append(ingredient.ingredient.name)
-                    shopping_list_amount.append(
-                        list(shopping_list_struct(ingredient.ingredient.
-                                                  measurement_unit,
-                                                  ingredient.amount)))
-                else:
-                    shopping_list_amount[shopping_list_name.index(
-                        ingredient.ingredient.name
-                    )][1] += ingredient.amount
-        for index in range(len(shopping_list_name)):
+            ingredient = IngredientAmount.objects.get(
+                recipe=recipe['recipe_id'])
+            if ingredient.ingredient.name not in shopping_list_name:
+                shopping_list_name.append(ingredient.ingredient.name)
+            shopping_list_amount.append(
+                list(shopping_list_struct(ingredient.ingredient.
+                                          measurement_unit,
+                                          ingredient.amount)))
+        for ingredient in ingredients:
+            total = ingredient['total_amount']
+            index = 0
             textob.textLine(
                 f'{shopping_list_name[index].capitalize()}'
                 f'({shopping_list_amount[index][0]})'
-                f' - {shopping_list_amount[index][1]}')
+                f' - {total}')
+            index += 1
         c.drawText(textob)
         c.showPage()
         c.save()

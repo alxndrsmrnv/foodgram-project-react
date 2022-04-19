@@ -1,8 +1,8 @@
 from django.forms import ValidationError
+from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from django.shortcuts import get_object_or_404
 
 from .models import Follow, Ingredient, IngredientAmount, Recipe, Tag, User
 
@@ -137,18 +137,15 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         self.set_tags_ingredients(recipe, tags, ingredients)
         return recipe
 
-    def update(self, instance, validated_data):
-        instance.tags.clear()
+    def update(self, instance, validated_data):  # вроде все правильно работает
+        instance.tags.clear()  # Да они очищаются, но не удаляются из базы
         instance.ingredients.clear()
-        instance.image = validated_data.get('image')
-        instance.name = validated_data.get('name')
-        instance.text = validated_data.get('text')
-        instance.cooking_time = validated_data.get('cooking_time')
-        IngredientAmount.objects.delete(recipe=instance)
-        tags = validated_data.get('tags')
-        ingredients = validated_data.get('ingredients')
-        self.set_tags_ingredients(instance, tags, ingredients)
-        return instance
+        tags = validated_data.pop('tags')  # модель ингредиента если так не
+        ingredients = validated_data.pop('ingredients')  # делать, то связка
+        super().update(instance, validated_data)
+        IngredientAmount.objects.filter(recipe=instance).delete()  # <- это не
+        self.set_tags_ingredients(instance, tags, ingredients)  # останется в
+        return instance  # базе, это удаление связки.
 
     def to_representation(self, instance):
         return RecipeSerializer(
