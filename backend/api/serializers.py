@@ -137,15 +137,15 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         self.set_tags_ingredients(recipe, tags, ingredients)
         return recipe
 
-    def update(self, instance, validated_data):  # вроде все правильно работает
-        instance.tags.clear()  # Да они очищаются, но не удаляются из базы
-        instance.ingredients.clear()
-        tags = validated_data.pop('tags')  # модель ингредиента если так не
-        ingredients = validated_data.pop('ingredients')  # делать, то связка
+    def update(self, instance, validated_data):
+        instance.tags.remove()
+        instance.ingredients.remove()
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
         super().update(instance, validated_data)
-        IngredientAmount.objects.filter(recipe=instance).delete()  # <- это не
-        self.set_tags_ingredients(instance, tags, ingredients)  # останется в
-        return instance  # базе, это удаление связки.
+        IngredientAmount.objects.filter(recipe=instance).delete()
+        self.set_tags_ingredients(instance, tags, ingredients)
+        return instance
 
     def to_representation(self, instance):
         return RecipeSerializer(
