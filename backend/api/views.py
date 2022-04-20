@@ -2,7 +2,6 @@ import io
 
 from django.db import IntegrityError
 from django.db.models import Sum
-from django.core.exceptions import BadRequest
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -77,7 +76,7 @@ class FollowUnfollowViewSet(APIView):
             object = Follow.objects.get(user=request.user, author=author)
             object.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except BadRequest:
+        except Follow.DoesNotExist:
             return Response('Вы не подписаны на этого пользователя',
                             status=status.HTTP_400_BAD_REQUEST)
 
@@ -127,7 +126,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                            recipe=recipe)
                 object.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
-            except BadRequest:
+            except model.DoesNotExist:
                 return Response('Не добавлено',
                                 status=status.HTTP_400_BAD_REQUEST)
         return Response('Что-то пошло не так',
