@@ -138,7 +138,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=(permissions.IsAuthenticated,))
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
-        self.favorite_and_shopping_cart(request, ShoppingCart, recipe)
+        return self.favorite_and_shopping_cart(request, ShoppingCart, recipe)
 
     @action(detail=True,
             methods=('post', 'delete'),
@@ -146,7 +146,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=(permissions.IsAuthenticated,))
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
-        self.favorite_and_shopping_cart(request, Favorite, recipe)
+        return self.favorite_and_shopping_cart(request, Favorite, recipe)
 
 
 class DownloadShoppingCart(APIView):
