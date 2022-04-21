@@ -22,7 +22,7 @@ class ProfileSerializer(UserSerializer):
         if request is None or request.user.is_anonymous:
             return False
         else:
-            return obj.follower.filter(author=obj.id).exists()
+            return obj.following.filter(author=obj.id).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -109,7 +109,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         if len(attrs['tags']) < 0:
             raise ValidationError('Добавьте теги')
         if len(attrs['tags']) > len(set(attrs['tags'])):
-            raise ValidationError('Ингредиенты не могут повторяться')
+            raise ValidationError('Теги не могут повторяться')
         return attrs
 
     def set_tags_ingredients(self, obj, tags, ingredients):
@@ -174,16 +174,16 @@ class SubscribersSerializer(serializers.ModelSerializer):
         if request is None or request.user.is_anonymous:
             return False
         else:
-            return obj.follower.filter(author=obj.id).exists()
+            return obj.following.filter(author=obj.id).exists()
 
     def get_recipes(self, obj):
-        recipes = obj.recipe.all()
+        recipes = obj.recipes.all()[:3]
         request = self.context.get('request')
         context = {'request': request}
         return RecipeInfoSerializer(recipes, many=True, context=context).data
 
     def get_recipes_count(self, obj):
-        return obj.recipe.count()
+        return obj.recipes.count()
 
 
 class FollowUnfollowSerializer(serializers.ModelSerializer):

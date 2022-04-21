@@ -38,7 +38,7 @@ class ProfileViewSet(UserViewSet):
         serializer = ProfileSerializer(request.user,
                                        data=request.data,
                                        partial=True)
-        serializer.is_valid(raise_exeption=True)
+        serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
