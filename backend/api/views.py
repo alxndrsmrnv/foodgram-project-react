@@ -162,7 +162,7 @@ class DownloadShoppingCart(APIView):
         pdfmetrics.registerFont(TTFont(
             'FreeSans',
             'FreeSans.ttf'))
-        textob.setFont('FreeSans', 32)
+        textob.setFont('FreeSans', 15)
         shopping_cart = ShoppingCart.objects.filter(user=request.user).values()
         shopping_list_name = []
         shopping_list_amount = []
@@ -184,12 +184,18 @@ class DownloadShoppingCart(APIView):
                 list(shopping_list_struct(ingredient.ingredient.
                                           measurement_unit,
                                           ingredient.amount)))
+        index = 1
         for ingredient in ingredients:
             total = ingredient['total_amount']
-            index = 0
+            if index % 37 == 0:
+                c.drawText(textob)
+                c.showPage()
+                textob = c.beginText()
+                textob.setTextOrigin(inch, inch)
+                textob.setFont('FreeSans', 15)
             textob.textLine(
-                f'{shopping_list_name[index].capitalize()}'
-                f'({shopping_list_amount[index][0]})'
+                f'{shopping_list_name[index-1].capitalize()}'
+                f'({shopping_list_amount[index-1][0]})'
                 f' - {total}')
             index += 1
         c.drawText(textob)
