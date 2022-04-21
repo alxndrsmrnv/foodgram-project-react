@@ -6,7 +6,7 @@ SECRET_KEY = os.getenv('HOST', default='0:8000')
 
 DEBUG = False
 
-ALLOWED_HOSTS = os.getenv('HOST', default='0:8000')
+ALLOWED_HOSTS = os.getenv('HOST', default='0:8000').rsplit()
 
 AUTH_USER_MODEL = 'users.User'
 
