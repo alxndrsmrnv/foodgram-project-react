@@ -2,11 +2,11 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.getenv('SECRET_KEY', default='')
+SECRET_KEY = 'asdasd'
 
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = os.getenv('HOST', default='0:8000').rsplit()
+ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -59,13 +59,8 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE',
-                            default='django.db.backends.postgresql'),
-        'NAME': os.getenv('POSTGRES_NAME', default='postgres'),
-        'USER': os.getenv('POSTGRES_USER', default='admin'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='admin'),
-        'HOST': os.getenv('DB_HOST', default='db'),
-        'PORT': os.getenv('DB_PORT', default='5432'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 AUTH_PASSWORD_VALIDATORS = [
