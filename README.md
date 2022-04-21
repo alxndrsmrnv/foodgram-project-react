@@ -1,7 +1,7 @@
 51.250.76.255
 adminka
-email:practicum@yandex.ru
-password:q1q1q1q1q1q1q1q1q1q
+email: practicum@yandex.ru
+password: q1q1q1q1q1q1q1q1q1q
 
 
 FoodgramProject это социальная сеть для тех кто любит готовить. Здесь можно просматривать рецепты авторов или опубликовать свой рецепт.
