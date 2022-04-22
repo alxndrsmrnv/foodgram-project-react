@@ -22,7 +22,7 @@ class ProfileSerializer(UserSerializer):
         if request is None or request.user.is_anonymous:
             return False
         else:
-            return obj.following.filter(author=obj.id).exists()
+            return obj.following.filter(author=obj.id, user=request.user).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -174,7 +174,7 @@ class SubscribersSerializer(serializers.ModelSerializer):
         if request is None or request.user.is_anonymous:
             return False
         else:
-            return obj.following.filter(author=obj.id).exists()
+            return obj.following.filter(author=obj.id, user=request.user).exists()
 
     def get_recipes(self, obj):
         recipes = obj.recipes.all()[:3]
